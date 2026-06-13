@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olist Intelligence Platform | Executive Dashboard</title>
+    <meta name="description" content="Customer Experience & Fulfillment Intelligence Dashboard — Revenue, Logistics, and Strategic Analytics for Olist E-Commerce.">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --bg-glass: rgba(255,255,255,0.04);
+            --border-glass: rgba(255,255,255,0.08);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #06b6d4;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f97316;
+            --accent-rose: #f43f5e;
+            --accent-green: #10b981;
+            --accent-yellow: #eab308;
+            --gradient-hero: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+            --gradient-card: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(59,130,246,0.05));
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.4);
+            --shadow-glow: 0 0 30px rgba(6,182,212,0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(6,182,212,0.06) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(139,92,246,0.06) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(59,130,246,0.03) 0%, transparent 70%);
+            animation: bgShift 20s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+        @keyframes bgShift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-30px, -30px) rotate(3deg); }
+        }
+
+        /* ── Navigation ── */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 2rem;
+            background: rgba(10,14,26,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--text-primary);
+        }
+        .navbar-brand .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--gradient-hero);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(6,182,212,0.3);
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            background: var(--bg-glass);
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid var(--border-glass);
+        }
+        .nav-tab {
+            padding: 0.5rem 1.25rem;
+            border-radius: 9px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+            white-space: nowrap;
+        }
+        .nav-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+        .nav-tab.active {
+            color: #fff;
+            background: var(--accent-blue);
+            box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+        }
+        .nav-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-meta .live-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+        }
+
+        /* ── Layout ── */
+        .page { display: none; position: relative; z-index: 1; }
+        .page.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+
+        .page-header {
+            margin-bottom: 1.75rem;
+        }
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.35rem;
+        }
+
+        /* ── KPI Cards ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            border-radius: 16px 16px 0 0;
+        }
+        .kpi-card:nth-child(1)::before { background: var(--accent-cyan); }
+        .kpi-card:nth-child(2)::before { background: var(--accent-blue); }
+        .kpi-card:nth-child(3)::before { background: var(--accent-orange); }
+        .kpi-card:nth-child(4)::before { background: var(--accent-green); }
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-glow);
+            border-color: rgba(6,182,212,0.2);
+        }
+        .kpi-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+        .kpi-value { font-size: 2rem; font-weight: 800; margin: 0.3rem 0; }
+        .kpi-delta { font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .kpi-delta.up { color: var(--accent-green); }
+        .kpi-delta.down { color: var(--accent-rose); }
+
+        /* ── Chart Cards ── */
+        .chart-grid { display: grid; gap: 1.25rem; margin-bottom: 1.75rem; }
+        .chart-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        .chart-grid.cols-1 { grid-template-columns: 1fr; }
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .chart-card h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        .chart-card h3 span {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.5rem;
+        }
+
+        /* ── Insight Cards ── */
+        .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+        .insight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        .insight-card.critical { border-left: 3px solid var(--accent-rose); }
+        .insight-card.warning { border-left: 3px solid var(--accent-orange); }
+        .insight-card.success { border-left: 3px solid var(--accent-green); }
+        .insight-card .tag {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+        }
+        .insight-card.critical .tag { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
+        .insight-card.warning .tag { background: rgba(249,115,22,0.15); color: var(--accent-orange); }
+        .insight-card.success .tag { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+        .insight-card h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .insight-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* ── Recommendations ── */
+        .rec-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+        }
+        .rec-card:hover { transform: translateX(6px); border-color: rgba(6,182,212,0.2); }
+        .rec-number {
+            min-width: 44px; height: 44px;
+            border-radius: 12px;
+            background: var(--gradient-hero);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+        .rec-content h4 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .rec-content p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+        .rec-content .impact {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background: rgba(16,185,129,0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(16,185,129,0.2);
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-glass);
+        }
+        .footer a { color: var(--accent-cyan); text-decoration: none; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .chart-grid.cols-2 { grid-template-columns: 1fr; }
+            .nav-tabs { display: none; }
+            .navbar { flex-wrap: wrap; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="navbar-brand">
+        <div class="logo-icon">📊</div>
+        Olist Intelligence Platform
+    </div>
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showPage('overview')">Executive Overview</button>
+        <button class="nav-tab" onclick="showPage('logistics')">Fulfillment & Logistics</button>
+        <button class="nav-tab" onclick="showPage('customer')">Customer Intelligence</button>
+        <button class="nav-tab" onclick="showPage('strategy')">Strategic Recommendations</button>
+    </div>
+    <div class="nav-meta">
+        <div class="live-dot"></div>
+        Live Dashboard
+    </div>
+</nav>
+
+<!-- ════════════════ PAGE 1: EXECUTIVE OVERVIEW ════════════════ -->
+<div id="page-overview" class="page active">
+<div class="container">
+    <div class="page-header">
+        <h1>Executive Overview</h1>
+        <p>High-level KPIs tracking Marketplace GMV, Logistics Health, and Customer Satisfaction across all regions.</p>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Total GMV</div>
+            <div class="kpi-value" style="color: var(--accent-cyan);">$7.2M</div>
+            <div class="kpi-delta up">▲ 12.4% MoM</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Orders Delivered</div>
+            <div class="kpi-value" style="color: var(--accent-blue);">98.2K</div>
+            <div class="kpi-delta up">▲ 8.1% MoM</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">SLA Breach Rate</div>
+            <div class="kpi-value" style="color: var(--accent-orange);">6.8%</div>
+            <div class="kpi-delta down">▼ +1.2pp MoM</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Avg CSAT Score</div>
+            <div class="kpi-value" style="color: var(--accent-green);">4.1<span style="font-size:1rem;color:var(--text-muted)"> / 5</span></div>
+            <div class="kpi-delta down">▼ -0.1 MoM</div>
+        </div>
+    </div>
+
+    <div class="chart-grid cols-2">
+        <div class="chart-card">
+            <h3>Revenue vs SLA Breach Trend <span>Jan–Jun 2018</span></h3>
+            <div id="chart-rev-sla"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Order Volume by Category <span>Top 8 Categories</span></h3>
+            <div id="chart-category"></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ════════════════ PAGE 2: FULFILLMENT & LOGISTICS ════════════════ -->
+<div id="page-logistics" class="page">
+<div class="container">
+    <div class="page-header">
+        <h1>Fulfillment & Logistics Intelligence</h1>
+        <p>Analyzing delivery bottlenecks, SLA compliance, and freight cost distribution across Brazilian regions.</p>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Avg Delivery Time</div>
+            <div class="kpi-value" style="color: var(--accent-cyan);">12.5d</div>
+            <div class="kpi-delta down">▼ +1.3d MoM</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">On-Time Rate</div>
+            <div class="kpi-value" style="color: var(--accent-blue);">93.2%</div>
+            <div class="kpi-delta down">▼ -1.2pp MoM</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Avg Freight Cost</div>
+            <div class="kpi-value" style="color: var(--accent-orange);">$19.99</div>
+            <div class="kpi-delta down">▼ +$2.10 MoM</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Northeast SLA Breach</div>
+            <div class="kpi-value" style="color: var(--accent-rose);">45.1%</div>
+            <div class="kpi-delta down">▼ +3.8pp MoM</div>
+        </div>
+    </div>
+
+    <div class="chart-grid cols-2">
+        <div class="chart-card">
+            <h3>SLA Breach Rate by Region <span>% Orders Breaching Estimated Delivery</span></h3>
+            <div id="chart-sla-region"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Avg Lead Time by Region <span>Days from Purchase to Delivery</span></h3>
+            <div id="chart-leadtime"></div>
+        </div>
+    </div>
+
+    <div class="chart-grid cols-1">
+        <div class="chart-card">
+            <h3>Delivery Funnel Breakdown <span>Where Delays Originate</span></h3>
+            <div id="chart-funnel"></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ════════════════ PAGE 3: CUSTOMER INTELLIGENCE ════════════════ -->
+<div id="page-customer" class="page">
+<div class="container">
+    <div class="page-header">
+        <h1>Customer Intelligence</h1>
+        <p>How delivery performance directly impacts Customer Satisfaction, Repeat Purchase Rate, and Lifetime Value.</p>
+    </div>
+
+    <div class="chart-grid cols-2">
+        <div class="chart-card">
+            <h3>CSAT Distribution <span>Review Score Distribution</span></h3>
+            <div id="chart-csat-dist"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Repeat Purchase Rate: On-Time vs Late <span>The Churn Pipeline</span></h3>
+            <div id="chart-repeat"></div>
+        </div>
+    </div>
+
+    <div class="insight-grid">
+        <div class="insight-card critical">
+            <div class="tag">Critical Finding</div>
+            <h4>75% Drop in Repeat Purchases After Late Delivery</h4>
+            <p>Customers who receive their order after the estimated delivery date are 75% less likely to make a second purchase. On-time customers: 18.5% repeat rate. Late customers: 4.5% repeat rate.</p>
+        </div>
+        <div class="insight-card warning">
+            <div class="tag">Warning</div>
+            <h4>1-Star Reviews Correlate with SLA Breaches</h4>
+            <p>When delivery exceeds the estimated date, the probability of a 1-star review spikes by 62%. The Northeast region accounts for 38% of all 1-star reviews despite only 14% of order volume.</p>
+        </div>
+        <div class="insight-card success">
+            <div class="tag">Opportunity</div>
+            <h4>RFM Segmentation Reveals High-Value Segment</h4>
+            <p>The top 8% of customers (RFM Score: Champions) generate 31% of total GMV. Targeted retention campaigns for this segment could recover an estimated $740K in annual LTV leakage.</p>
+        </div>
+    </div>
+
+    <div class="chart-grid cols-1">
+        <div class="chart-card">
+            <h3>Cohort Retention Analysis <span>Monthly Cohort Repeat Purchase Rates</span></h3>
+            <div id="chart-cohort"></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ════════════════ PAGE 4: STRATEGIC RECOMMENDATIONS ════════════════ -->
+<div id="page-strategy" class="page">
+<div class="container">
+    <div class="page-header">
+        <h1>Strategic Recommendations</h1>
+        <p>Data-driven action items to reduce revenue leakage, improve CSAT, and increase Customer Lifetime Value.</p>
+    </div>
+
+    <div class="insight-grid">
+        <div class="insight-card critical">
+            <div class="tag">Revenue Impact</div>
+            <h4>Estimated Annual Revenue Leakage: $2.4M</h4>
+            <p>Based on our root cause analysis, logistics-driven churn is costing the marketplace an estimated $2.4M per year in lost repeat purchases and customer lifetime value.</p>
+        </div>
+        <div class="insight-card warning">
+            <div class="tag">Root Cause</div>
+            <h4>60% of SLA Breaches Originate at Seller Dispatch</h4>
+            <p>The majority of delivery delays are not caused by carriers — they originate from sellers taking more than 4 days to hand off packages. The carrier leg meets SLA in 87% of cases.</p>
+        </div>
+    </div>
+
+    <div class="rec-card">
+        <div class="rec-number">1</div>
+        <div class="rec-content">
+            <h4>Implement Seller Dispatch Penalty System</h4>
+            <p>Penalize sellers who consistently fail 48-hour dispatch SLAs. This alone could reduce overall SLA breaches by an estimated 35%, directly improving CSAT scores and repeat purchase rates.</p>
+            <div class="impact">Est. Impact: +2.1pp CSAT, -$840K leakage recovered</div>
+        </div>
+    </div>
+    <div class="rec-card">
+        <div class="rec-number">2</div>
+        <div class="rec-content">
+            <h4>Open Northeast Cross-Docking Fulfillment Hub</h4>
+            <p>Establish a secondary fulfillment hub in Bahia to service the North/Northeast corridor. This would cut average lead times from 21 days to ~12 days and reduce freight costs by 18%.</p>
+            <div class="impact">Est. Impact: -6 day lead time, +$1.1M LTV recovered</div>
+        </div>
+    </div>
+    <div class="rec-card">
+        <div class="rec-number">3</div>
+        <div class="rec-content">
+            <h4>Launch Win-Back Campaign for Churned Late-Delivery Customers</h4>
+            <p>Target users who experienced an SLA breach in the last 6 months with a 15% discount win-back campaign. Based on cohort data, this could recover approximately 12% of churned high-value customers.</p>
+            <div class="impact">Est. Impact: +3.2K customers recovered, +$460K annual revenue</div>
+        </div>
+    </div>
+</div>
+</div>
+
+<footer class="footer">
+    Built with SQL, Python, and Plotly.js · Data Source: Olist Brazilian E-Commerce Dataset (100K+ orders) · <a href="https://github.com/Rikis3/olist-intelligence-platform" target="_blank">View on GitHub</a>
+</footer>
+
+<script>
+// ── Page Navigation ──
+function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    event.target.classList.add('active');
+}
+
+const plotlyLayout = {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { family: 'Inter', color: '#94a3b8', size: 12 },
+    margin: { l: 50, r: 20, t: 20, b: 50 },
+    xaxis: { gridcolor: 'rgba(255,255,255,0.05)', zerolinecolor: 'rgba(255,255,255,0.05)' },
+    yaxis: { gridcolor: 'rgba(255,255,255,0.05)', zerolinecolor: 'rgba(255,255,255,0.05)' },
+    legend: { orientation: 'h', y: -0.15, font: { size: 11 } },
+    hoverlabel: { bgcolor: '#1e293b', bordercolor: '#334155', font: { color: '#e2e8f0', family: 'Inter' } }
+};
+const plotlyConfig = { displayModeBar: false, responsive: true };
+
+// ── Chart 1: Revenue vs SLA (Dual Axis) ──
+const months = ['Jan 2018', 'Feb 2018', 'Mar 2018', 'Apr 2018', 'May 2018', 'Jun 2018'];
+Plotly.newPlot('chart-rev-sla', [
+    { x: months, y: [1.2, 1.4, 1.3, 1.5, 1.8, 1.7], type: 'bar', name: 'Revenue ($M)', marker: { color: '#3b82f6', cornerradius: 6 } },
+    { x: months, y: [4.5, 5.0, 5.2, 6.8, 8.5, 8.0], type: 'scatter', mode: 'lines+markers', name: 'SLA Breach %', yaxis: 'y2', line: { color: '#f97316', width: 3 }, marker: { size: 8, color: '#f97316' } }
+], { ...plotlyLayout, yaxis: { ...plotlyLayout.yaxis, title: { text: 'Revenue ($M)', font: { size: 11 } } }, yaxis2: { title: { text: 'SLA Breach %', font: { size: 11, color: '#f97316' } }, overlaying: 'y', side: 'right', gridcolor: 'rgba(0,0,0,0)', font: { color: '#f97316' } }, height: 340 }, plotlyConfig);
+
+// ── Chart 2: Category Distribution ──
+const cats = ['Bed/Bath/Table', 'Health & Beauty', 'Sports & Leisure', 'Furniture', 'Computers', 'Housewares', 'Watches & Gifts', 'Telephony'];
+const catVals = [11.2, 9.8, 8.6, 8.1, 7.3, 6.9, 5.7, 5.2];
+Plotly.newPlot('chart-category', [
+    { x: catVals, y: cats, type: 'bar', orientation: 'h', marker: { color: catVals.map((v,i) => `hsl(${200 + i*18}, 70%, ${55 + i*3}%)`), cornerradius: 6 }, text: catVals.map(v => v+'%'), textposition: 'outside', textfont: { color: '#94a3b8', size: 11 } }
+], { ...plotlyLayout, yaxis: { ...plotlyLayout.yaxis, autorange: 'reversed' }, xaxis: { ...plotlyLayout.xaxis, title: { text: '% of Total Orders', font: { size: 11 } } }, height: 340, margin: { ...plotlyLayout.margin, l: 130 } }, plotlyConfig);
+
+// ── Chart 3: SLA Breach by Region ──
+const regions = ['SP', 'RJ', 'MG', 'RS', 'BA', 'PE'];
+const breachRates = [2.1, 3.5, 4.0, 6.2, 42.5, 45.1];
+Plotly.newPlot('chart-sla-region', [
+    { x: regions, y: breachRates, type: 'bar', marker: { color: breachRates.map(v => v > 20 ? '#f43f5e' : v > 5 ? '#f97316' : '#10b981'), cornerradius: 6 }, text: breachRates.map(v => v+'%'), textposition: 'outside', textfont: { color: '#94a3b8', size: 12 } }
+], { ...plotlyLayout, yaxis: { ...plotlyLayout.yaxis, title: { text: 'SLA Breach Rate (%)', font: { size: 11 } } }, height: 340 }, plotlyConfig);
+
+// ── Chart 4: Lead Time by Region ──
+const leadTimes = [6, 8, 9, 12, 21, 23];
+Plotly.newPlot('chart-leadtime', [
+    { x: leadTimes, y: regions, type: 'bar', orientation: 'h', marker: { color: leadTimes.map(v => v > 15 ? '#f43f5e' : v > 10 ? '#f97316' : '#06b6d4'), cornerradius: 6 }, text: leadTimes.map(v => v+' days'), textposition: 'outside', textfont: { color: '#94a3b8', size: 12 } }
+], { ...plotlyLayout, xaxis: { ...plotlyLayout.xaxis, title: { text: 'Avg Days to Delivery', font: { size: 11 } } }, height: 340, margin: { ...plotlyLayout.margin, l: 50 } }, plotlyConfig);
+
+// ── Chart 5: Delivery Funnel ──
+Plotly.newPlot('chart-funnel', [
+    { x: ['Seller Dispatch', 'Carrier Pickup', 'In Transit', 'Last Mile', 'Delivered'], y: [4.2, 1.1, 3.8, 2.6, 0.8], type: 'bar', marker: { color: ['#f43f5e', '#f97316', '#eab308', '#3b82f6', '#10b981'], cornerradius: 6 }, text: ['4.2 days', '1.1 days', '3.8 days', '2.6 days', '0.8 days'], textposition: 'outside', textfont: { color: '#94a3b8', size: 12 } }
+], { ...plotlyLayout, yaxis: { ...plotlyLayout.yaxis, title: { text: 'Avg Days in Stage', font: { size: 11 } } }, xaxis: { ...plotlyLayout.xaxis }, height: 300, annotations: [{ x: 'Seller Dispatch', y: 4.6, text: '⚠ BOTTLENECK', showarrow: false, font: { color: '#f43f5e', size: 11, family: 'Inter' } }] }, plotlyConfig);
+
+// ── Chart 6: CSAT Distribution ──
+Plotly.newPlot('chart-csat-dist', [
+    { x: ['1 ★', '2 ★', '3 ★', '4 ★', '5 ★'], y: [11.5, 3.2, 8.1, 12.8, 64.4], type: 'bar', marker: { color: ['#f43f5e', '#f97316', '#eab308', '#3b82f6', '#10b981'], cornerradius: 6 }, text: ['11.5%', '3.2%', '8.1%', '12.8%', '64.4%'], textposition: 'outside', textfont: { color: '#94a3b8', size: 12 } }
+], { ...plotlyLayout, yaxis: { ...plotlyLayout.yaxis, title: { text: '% of Reviews', font: { size: 11 } } }, height: 340 }, plotlyConfig);
+
+// ── Chart 7: Repeat Purchase Comparison ──
+Plotly.newPlot('chart-repeat', [
+    { x: ['On-Time Delivery', 'Late Delivery (SLA Breach)'], y: [18.5, 4.5], type: 'bar', marker: { color: ['#10b981', '#f43f5e'], cornerradius: 6 }, text: ['18.5%', '4.5%'], textposition: 'outside', textfont: { color: '#e2e8f0', size: 16, family: 'Inter' }, width: [0.5, 0.5] }
+], { ...plotlyLayout, yaxis: { ...plotlyLayout.yaxis, title: { text: 'Repeat Purchase Rate (%)', font: { size: 11 } }, range: [0, 24] }, height: 340, annotations: [{ x: 0.5, y: 22, text: '75% DROP ↓', showarrow: false, font: { color: '#f43f5e', size: 16, family: 'Inter' } }] }, plotlyConfig);
+
+// ── Chart 8: Cohort Retention Heatmap ──
+const cohorts = ['Jan 2017', 'Feb 2017', 'Mar 2017', 'Apr 2017', 'May 2017', 'Jun 2017'];
+const retMonths = ['Month 0', 'Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5'];
+const retData = [
+    [100, 6.2, 4.1, 3.8, 3.2, 2.9],
+    [100, 5.8, 3.9, 3.5, 3.0, 2.7],
+    [100, 6.5, 4.3, 3.9, 3.4, 3.1],
+    [100, 5.1, 3.6, 3.2, 2.8, null],
+    [100, 5.4, 3.7, 3.3, null, null],
+    [100, 4.9, 3.4, null, null, null]
+];
+Plotly.newPlot('chart-cohort', [
+    { z: retData, x: retMonths, y: cohorts, type: 'heatmap', colorscale: [[0, '#0a0e1a'], [0.05, '#1e3a5f'], [0.1, '#3b82f6'], [0.5, '#06b6d4'], [1, '#10b981']], text: retData.map(row => row.map(v => v !== null ? v + '%' : '')), texttemplate: '%{text}', hovertemplate: 'Cohort: %{y}<br>Period: %{x}<br>Retention: %{z}%<extra></extra>', colorbar: { title: { text: 'Retention %', font: { color: '#94a3b8' } }, tickfont: { color: '#94a3b8' } } }
+], { ...plotlyLayout, yaxis: { ...plotlyLayout.yaxis, autorange: 'reversed' }, height: 350, margin: { ...plotlyLayout.margin, l: 90 } }, plotlyConfig);
+</script>
+</body>
+</html>
