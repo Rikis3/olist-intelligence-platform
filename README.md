@@ -1,16 +1,21 @@
 # Olist Customer Experience & Fulfillment Intelligence Platform
 
 ![Project Status](https://img.shields.io/badge/Status-Complete-brightgreen)
-![Data Stack](https://img.shields.io/badge/Stack-BigQuery%20%7C%20dbt%20%7C%20SQL%20%7C%20Streamlit-blue)
+![Data Stack](https://img.shields.io/badge/Stack-BigQuery%20%7C%20dbt%20%7C%20SQL%20%7C%20Plotly.js-blue)
+[![Live Dashboard](https://img.shields.io/badge/🔗_Live_Dashboard-Click_to_Explore-06b6d4?style=for-the-badge)](https://rikis3.github.io/olist-intelligence-platform/)
 
 <div align="center">
-  <img src="docs/dashboard_mockup.png" alt="Executive Dashboard" width="800"/>
+  <a href="https://rikis3.github.io/olist-intelligence-platform/">
+    <img src="docs/dashboard_mockup.png" alt="Executive Dashboard — Click to view live" width="800"/>
+  </a>
+  <br/>
+  <sub>👆 Click the image above to explore the live interactive dashboard</sub>
 </div>
 
 ## 📌 Executive Summary
 This repository contains an enterprise-grade Analytics Engineering and Business Intelligence project built on the **Olist Brazilian E-Commerce dataset** (100k+ orders). 
 
-Rather than a simple flat-file EDA, this project simulates a modern data stack environment. I designed a highly optimized **Star Schema Data Warehouse** in BigQuery dialect SQL, developed advanced analytical marts, and built a Streamlit executive dashboard. The ultimate goal was to perform root-cause analysis on how fulfillment logistics impact Customer Lifetime Value (CLV).
+Rather than a simple flat-file EDA, this project simulates a modern data stack environment. I designed a highly optimized **Star Schema Data Warehouse** in BigQuery dialect SQL, developed advanced analytical marts, and built a production-grade interactive web dashboard. The ultimate goal was to perform root-cause analysis on how fulfillment logistics impact Customer Lifetime Value (CLV).
 
 ## 🏗️ Architecture & Deliverables
 
